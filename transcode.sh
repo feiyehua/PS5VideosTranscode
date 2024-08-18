@@ -1,7 +1,7 @@
 ###
  # @Author       : FeiYehua
  # @Date         : 2024-08-18 00:15:02
- # @LastEditTime : 2024-08-18 12:52:08
+ # @LastEditTime : 2024-08-18 15:26:42
  # @LastEditors  : FeiYehua
  # @Description  : 
  # @FilePath     : transcode.sh
@@ -49,19 +49,23 @@ delete_original_file() {
         if [ $(ls -l "$filename.mp4" | awk '{print $5}') -le 1000 ]; then
           echo "Covert Failed (Empty file), delete coverted file! ($filename.mp4)"
           delete_file "$filename.mp4"
+        elif ! ffmpeg -v error -i "$filename.mp4" -f null -; then
+          echo "Covert Failed (Damaged file), delete coverted file! ($filename.mp4)"
+          delete_file "$filename.mp4"
         else
         #echo "find! $filename"
         #ffmpeg -hwaccel videotoolbox -i "$file" -c:v h264_videotoolbox -b:v 13M -c:a copy "$filename".mp4
           local webmDuration=$(ffmpeg -i "$filename.webm" 2>&1 | grep "Duration")
           local mp4Duration=$(ffmpeg -i "$filename.mp4" 2>&1 | grep "Duration")
+          #ffmpeg -i "$filename.mp4"
           webmDuration=${webmDuration%%.*}
           mp4Duration=${mp4Duration%%.*}
           local webmSecond=${webmDuration##*:}
           local mp4Second=${mp4Duration##*:}
           webmDuration=${webmDuration%:*}
           mp4Duration=${mp4Duration%:*}
-        #echo $webmSecond
-        #echo $mp4Second
+        echo $webmSecond
+        echo $mp4Second
         #echo $webmDuration
         #echo $mp4Duration
           local webmMinute=${webmDuration##*:}
@@ -96,7 +100,7 @@ delete_original_file() {
 }
 if [ -z "$1" ]; then
     directory="./"
-elif [ $1 == delete ]; then
+elif [ "$1" == delete ]; then
     echo error!
     exit 1
 else
