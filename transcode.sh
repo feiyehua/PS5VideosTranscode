@@ -1,7 +1,7 @@
 ###
  # @Author       : FeiYehua
  # @Date         : 2024-08-18 00:15:02
- # @LastEditTime : 2024-08-18 15:26:42
+ # @LastEditTime : 2024-08-18 21:10:43
  # @LastEditors  : FeiYehua
  # @Description  : 
  # @FilePath     : transcode.sh
@@ -36,6 +36,7 @@ delete_file()
     end tell
 EOF
   echo "Moved to trash: $current_file"
+  echo "---------------"
 
 }
 delete_original_file() {
@@ -47,16 +48,18 @@ delete_original_file() {
       local filename="${file%.*}"
       if [ "$extension" = "webm" ] && [ -f "$filename.mp4" ]; then
         if [ $(ls -l "$filename.mp4" | awk '{print $5}') -le 1000 ]; then
-          echo "Covert Failed (Empty file), delete coverted file! ($filename.mp4)"
+          printf "\e[31mCovert Failed (Empty file)\e[0m, delete coverted file! ($filename.mp4)\n"
           delete_file "$filename.mp4"
-        elif ! ffmpeg -v error -i "$filename.mp4" -f null -; then
-          echo "Covert Failed (Damaged file), delete coverted file! ($filename.mp4)"
-          delete_file "$filename.mp4"
+        #elif ffmpeg -v error -i "$filename" 2>&1 | grep -q "Invalid data found when #processing input"; then
+        #  echo "Covert Failed (Damaged file), delete coverted file! ($filename.mp4)"
+        #  delete_file "$filename.mp4"
         else
         #echo "find! $filename"
         #ffmpeg -hwaccel videotoolbox -i "$file" -c:v h264_videotoolbox -b:v 13M -c:a copy "$filename".mp4
           local webmDuration=$(ffmpeg -i "$filename.webm" 2>&1 | grep "Duration")
           local mp4Duration=$(ffmpeg -i "$filename.mp4" 2>&1 | grep "Duration")
+          #echo $webmDuration
+          #echo $mp4Duration
           #ffmpeg -i "$filename.mp4"
           webmDuration=${webmDuration%%.*}
           mp4Duration=${mp4Duration%%.*}
@@ -64,30 +67,28 @@ delete_original_file() {
           local mp4Second=${mp4Duration##*:}
           webmDuration=${webmDuration%:*}
           mp4Duration=${mp4Duration%:*}
-        echo $webmSecond
-        echo $mp4Second
-        #echo $webmDuration
-        #echo $mp4Duration
+        #echo $webmSecond
+        #echo $mp4Second
           local webmMinute=${webmDuration##*:}
-          local mp4Minute=${webmDuration##*:}
+          local mp4Minute=${mp4Duration##*:}
         #echo $webmMinute
         #echo $mp4Minute
           webmDuration=${webmDuration%:*}
           mp4Duration=${mp4Duration%:*}
           local webmHour=${webmDuration##* }
-          local mp4Hour=${webmDuration##* }
+          local mp4Hour=${mp4Duration##* }
         #echo $webmHour
         #echo $mp4Hour
-          local webmLength=$(($webmHour*3600 + $webmMinute*60 + $webmSecond))
-          local mp4Length=$(($mp4Hour*3600 + $mp4Minute*60 + $mp4Second))
+          local webmLength=$((10#$webmHour*3600 + 10#$webmMinute*60 + 10#$webmSecond))
+          local mp4Length=$((10#$mp4Hour*3600 + 10#$mp4Minute*60 + 10#$mp4Second))
         #echo $webmLength
         #echo $mp4Length
           local durationGap=$(($webmLength-$mp4Length))
           if [ $durationGap -ge -1 ] && [ $durationGap -le 1 ] ; then
-            echo "Covert Succeed, delete original file! ($filename.webm)"
+            printf "\e[32mCovert Succeed\e[0m, delete original file! ($filename.webm)\n"
             delete_file "$filename.webm"
           else
-            echo "Covert Failed (Convert didn't complete), delete coverted file! ($filename.mp4)"
+            printf "\e[31mCovert Failed (Convert didn't complete)\e[0m, delete coverted file! ($filename.mp4)\n"
             delete_file "$filename.mp4"
           fi
         fi
