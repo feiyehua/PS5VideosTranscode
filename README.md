@@ -8,4 +8,6 @@ Usage:
 
 `./transcode.sh /path/of/your/videos\ clips/` Transcode all your WebP files in /path/to/your/videos/clips/ (In macOS you can simply drag and drop your folder to terminal)
 
+`./transcode.sh /path/of/your/videos\ clips/ delete` Move converted original files and unsucessfully output file into trash. You must spcify the path manually.
+
 Note: The script will ignore every file that has been transcoded already.
