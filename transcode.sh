@@ -1,7 +1,7 @@
 ###
  # @Author       : FeiYehua
  # @Date         : 2024-08-18 00:15:02
- # @LastEditTime : 2024-08-18 21:10:43
+ # @LastEditTime : 2024-08-20 00:43:02
  # @LastEditors  : FeiYehua
  # @Description  : 
  # @FilePath     : transcode.sh
@@ -18,7 +18,8 @@ traverse_directory() {
       local filename="${file%.*}"
       if [ "$extension" = "webm" ] && ! [ -f "$filename.mp4" ]; then
         #echo "find! $filename"
-        ffmpeg -hwaccel videotoolbox -i "$file" -c:v h264_videotoolbox -b:v 13M -c:a copy "$filename".mp4
+        ffmpeg -i "$file" -c:v libx264 -vcodec copy -acodec copy "$filename".mp4
+        #ffmpeg -hwaccel videotoolbox -i "$file" -c:v hevc_videotoolbox -b:v 45M -c:a copy "$filename".mp4
       fi
     elif [ -d "$file" ]; then
       echo "Find directory: $file"
